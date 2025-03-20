@@ -28,8 +28,10 @@ export function drawSquare(turtle: Turtle, sideLength: number): void {
  * @returns The length of the chord.
  */
 export function chordLength(radius: number, angleInDegrees: number): number {
-  const angleInRadians = (angleInDegrees * Math.PI) / 180; // Converting degrees to radians
-  return 2 * radius * Math.sin(angleInRadians / 2);
+  const angleInRadians = (angleInDegrees * Math.PI) / 180; // Convert degrees to radians
+  const result = 2 * radius * Math.sin(angleInRadians / 2);
+
+  return Number(result.toFixed(6)); // Round to 6 decimal places to avoid floating-point issues
 }
 
 /**
