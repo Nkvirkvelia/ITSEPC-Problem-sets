@@ -298,11 +298,52 @@ describe("update()", () => {
  *
  * TODO: Describe your testing strategy for getHint() here.
  */
-describe("getHint()", () => {
-  it("Example test case - replace with your own tests", () => {
-    assert.fail(
-      "Replace this test case with your own tests based on your testing strategy"
+describe.only("getHint()", () => {
+  it("should return the correct hint for a flashcard", () => {
+    const card = new Flashcard("What is 2 + 2?", "4", "Simple math", []);
+    const hint = getHint(card);
+
+    assert.strictEqual(hint, "Simple math", "The hint should be 'Simple math'");
+  });
+
+  it("should handle an empty hint", () => {
+    const card = new Flashcard(
+      "What is the capital of France?",
+      "Paris",
+      "",
+      []
     );
+    const hint = getHint(card);
+
+    assert.strictEqual(hint, "", "The hint should be empty");
+  });
+
+  it("should throw an error if the hint is missing", () => {
+    const card = new Flashcard("What is 2+2?", "4", "", []); // Hint is an empty string
+
+    try {
+      getHint(card);
+      assert.fail("Missing hint should throw an error");
+    } catch (error: unknown) {
+      // Type assertion for the error
+      if (error instanceof Error) {
+        assert.strictEqual(
+          error.message,
+          "Invalid flashcard or missing hint", // Match this message with your function's error message
+          "Expected error message for missing hint"
+        );
+      } else {
+        // If it's not an instance of Error, we fail the test
+        assert.fail("Expected an Error to be thrown");
+      }
+    }
+  });
+
+  it("should return the correct hint for a flashcard with a single-word hint", () => {
+    const card = new Flashcard("What is 3 + 3?", "6", "Basic", []);
+    const hint = getHint(card);
+
+    assert.strictEqual(hint, "Basic", "The hint should be 'Basic'");
   });
 });
 
