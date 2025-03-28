@@ -208,13 +208,88 @@ describe("practice()", () => {
 /*
  * Testing strategy for update():
  *
- * TODO: Describe your testing strategy for update() here.
+ * Incorrect answer: Verifies the card is moved to bucket 0 when answered incorrectly.
+ * Hard answer: Ensures the card stays in the same bucket when answered hard.
+ * Easy answer: Confirms the card moves to the next bucket when answered easily.
+ * Card not in any bucket: Tests that a new bucket (bucket 0) is created when the card is not found in any existing bucket.
+ * Exceeding bucket 4: Ensures the card does not exceed bucket 4 when answered easily.
  */
 describe("update()", () => {
-  it("Example test case - replace with your own tests", () => {
-    assert.fail(
-      "Replace this test case with your own tests based on your testing strategy"
+  it("should move the card to bucket 0 when answered incorrectly", () => {
+    const card = new Flashcard("What is 2+2?", "4", "Think simple", []);
+    const buckets: BucketMap = new Map<number, Set<Flashcard>>([
+      [0, new Set()],
+      [1, new Set([card])],
+      [2, new Set()],
+    ]);
+
+    const updatedBuckets = update(buckets, card, AnswerDifficulty.Wrong);
+
+    // Check if the card is in bucket 0
+    assert(updatedBuckets.get(0)?.has(card), "Card should be in bucket 0");
+    // Ensure the card is not in bucket 1
+    assert(!updatedBuckets.get(1)?.has(card), "Card should not be in bucket 1");
+  });
+
+  it("should stay in the same bucket when answered hard", () => {
+    const card = new Flashcard("What is 3+3?", "6", "Think simple", []);
+    const buckets: BucketMap = new Map<number, Set<Flashcard>>([
+      [1, new Set([card])],
+      [2, new Set()],
+    ]);
+
+    const updatedBuckets = update(buckets, card, AnswerDifficulty.Hard);
+
+    // Check if the card is still in bucket 1
+    assert(
+      updatedBuckets.get(1)?.has(card),
+      "Card should still be in bucket 1"
     );
+    // Ensure the card is not in bucket 2
+    assert(!updatedBuckets.get(2)?.has(card), "Card should not be in bucket 2");
+  });
+
+  it("should move the card to the next bucket when answered easily", () => {
+    const card = new Flashcard("What is 5+5?", "10", "Think simple", []);
+    const buckets: BucketMap = new Map<number, Set<Flashcard>>([
+      [1, new Set([card])],
+      [2, new Set()],
+    ]);
+
+    const updatedBuckets = update(buckets, card, AnswerDifficulty.Easy);
+
+    // Check if the card is now in bucket 2
+    assert(updatedBuckets.get(2)?.has(card), "Card should be in bucket 2");
+    // Ensure the card is no longer in bucket 1
+    assert(!updatedBuckets.get(1)?.has(card), "Card should not be in bucket 1");
+  });
+
+  it("should create bucket 0 if the card is not found in any bucket", () => {
+    const card = new Flashcard("What is 4+4?", "8", "Think simple", []);
+    const buckets: BucketMap = new Map<number, Set<Flashcard>>([
+      [1, new Set()],
+      [2, new Set()],
+    ]);
+
+    const updatedBuckets = update(buckets, card, AnswerDifficulty.Wrong);
+
+    // Check if the card is added to bucket 0
+    assert(updatedBuckets.get(0)?.has(card), "Card should be in bucket 0");
+  });
+
+  it("should not exceed bucket 4 when moving up", () => {
+    const card = new Flashcard("What is 6+6?", "12", "Think simple", []);
+    const buckets: BucketMap = new Map<number, Set<Flashcard>>([
+      [3, new Set([card])],
+      [4, new Set()],
+    ]);
+
+    const updatedBuckets = update(buckets, card, AnswerDifficulty.Easy);
+
+    // Check if the card is in bucket 4
+    assert(updatedBuckets.get(4)?.has(card), "Card should be in bucket 4");
+    // Ensure the card is not in bucket 3
+    assert(!updatedBuckets.get(3)?.has(card), "Card should not be in bucket 3");
   });
 });
 

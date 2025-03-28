@@ -130,8 +130,54 @@ export function update(
   card: Flashcard,
   difficulty: AnswerDifficulty
 ): BucketMap {
-  // TODO: Implement this function
-  throw new Error("Implement me!");
+  const newBuckets = new Map<number, Set<Flashcard>>();
+  let currentBucket = -1;
+
+  // Iterating through the buckets and checking where the card is currently located
+  for (const [bucketNum, cards] of buckets.entries()) {
+    const newSet = new Set<Flashcard>(cards);
+    newBuckets.set(bucketNum, newSet);
+
+    if (cards.has(card)) {
+      currentBucket = bucketNum;
+    }
+  }
+
+  // If the card wasn't found in any bucket, we add it to bucket 0
+  if (currentBucket === -1) {
+    if (!newBuckets.has(0)) {
+      newBuckets.set(0, new Set<Flashcard>());
+    }
+    currentBucket = 0; // Set to bucket 0 if not found
+  }
+
+  // Remove the card from the current bucket
+  const currentSet = newBuckets.get(currentBucket)!;
+  currentSet.delete(card);
+
+  // Determine the new bucket based on difficulty
+  let newBucket: number;
+  if (difficulty === AnswerDifficulty.Wrong) {
+    newBucket = 0; // If answered incorrectly, move to bucket 0
+  } else if (difficulty === AnswerDifficulty.Hard) {
+    newBucket = currentBucket; // If answered hard, stay in the same bucket
+  } else {
+    newBucket = Math.min(currentBucket + 1, 4); // If answered easily, move to next bucket (max 4)
+  }
+
+  // Ensure the new bucket exists
+  if (!newBuckets.has(newBucket)) {
+    newBuckets.set(newBucket, new Set<Flashcard>());
+  }
+
+  // Add the card to the new bucket
+  newBuckets.get(newBucket)!.add(card);
+
+  // Debugging logs to check bucket contents after the update
+  console.log("Card moved to bucket:", newBucket);
+  console.log("Buckets after update:", [...newBuckets.entries()]);
+
+  return newBuckets;
 }
 
 /**
