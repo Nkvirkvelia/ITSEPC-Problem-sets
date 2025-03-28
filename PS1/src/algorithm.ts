@@ -11,7 +11,7 @@
 import { Flashcard, AnswerDifficulty, BucketMap } from "./flashcards";
 
 /**
- * Converts a Map representation of learning buckets into an Array-of-Set representation.
+ * Transforms a BucketMap into an array representation where each index corresponds to a bucket.
  *
  * @param buckets Map where keys are bucket numbers and values are sets of Flashcards.
  * @returns Array of Sets, where element at index i is the set of flashcards in bucket i.
@@ -19,8 +19,27 @@ import { Flashcard, AnswerDifficulty, BucketMap } from "./flashcards";
  * @spec.requires buckets is a valid representation of flashcard buckets.
  */
 export function toBucketSets(buckets: BucketMap): Array<Set<Flashcard>> {
-  // TODO: Implement this function
-  throw new Error("Implement me!");
+  let highestBucket = 0;
+
+  //Determining the maximum bucket number
+  for (const bucketNum of buckets.keys()) {
+    if (bucketNum > highestBucket) {
+      highestBucket = bucketNum;
+    }
+  }
+
+  // Initializing an array with emply sets
+  const bucketArray: Array<Set<Flashcard>> = [];
+  for (let i = 0; i <= highestBucket; i++) {
+    bucketArray.push(new Set<Flashcard>());
+  }
+
+  //Populating the array with flashcards from map
+  for (const [bucketNum, flashcardSet] of buckets.entries()) {
+    bucketArray[bucketNum] = flashcardSet;
+  }
+
+  return bucketArray;
 }
 
 /**
