@@ -296,9 +296,12 @@ describe("update()", () => {
 /*
  * Testing strategy for getHint():
  *
- * TODO: Describe your testing strategy for getHint() here.
+ * Valid hint: Varifies that the function returns the correct hint when provided
+ * Empty Hint: Ensures that an empty hint is handled correctly
+ * Missing Hint: Confirms that the function throws an error when the hint is missing
+ * Single-Word Hint: Checks if a single-word hint is returned correctly
  */
-describe.only("getHint()", () => {
+describe("getHint()", () => {
   it("should return the correct hint for a flashcard", () => {
     const card = new Flashcard("What is 2 + 2?", "4", "Simple math", []);
     const hint = getHint(card);
@@ -319,22 +322,27 @@ describe.only("getHint()", () => {
   });
 
   it("should throw an error if the hint is missing", () => {
-    const card = new Flashcard("What is 2+2?", "4", "", []); // Hint is an empty string
+    const card = new Flashcard(
+      "What is 2+2?",
+      "4",
+      undefined as unknown as string,
+      []
+    );
 
     try {
       getHint(card);
-      assert.fail("Missing hint should throw an error");
+      assert.fail("Expected an error to be thrown for missing hint");
     } catch (error: unknown) {
       // Type assertion for the error
       if (error instanceof Error) {
         assert.strictEqual(
           error.message,
-          "Invalid flashcard or missing hint", // Match this message with your function's error message
+          "Invalid flashcard or missing hint",
           "Expected error message for missing hint"
         );
       } else {
         // If it's not an instance of Error, we fail the test
-        assert.fail("Expected an Error to be thrown");
+        assert.fail("Expected an Error instance to be thrown");
       }
     }
   });

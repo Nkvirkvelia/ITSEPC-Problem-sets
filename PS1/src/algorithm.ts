@@ -188,8 +188,8 @@ export function update(
  * @spec.requires card is a valid Flashcard.
  */
 export function getHint(card: Flashcard): string {
-  if (!card || card.hint === undefined || card.hint === null) {
-    throw new Error("Missing hint should throw an error");
+  if (card.hint === undefined || card.hint === null) {
+    throw new Error("Invalid flashcard or missing hint");
   }
 
   return card.hint; // Return the hint, even if it's an empty string
