@@ -147,12 +147,60 @@ describe("getBucketRange()", () => {
 /*
  * Testing strategy for practice():
  *
- * TODO: Describe your testing strategy for practice() here.
+ * - Always includes cards from bucket 0.
+ * - Includes cards from bucket `n` if the given day is divisible by `2^n`.
+ * The test cases verify:
+ * 1. Empty Buckets Test: Ensures an empty input returns an empty set.
+ * 2. Day 0 Test: Confirms that all cards are reviewed on day 0.
+ * 3. Day 2 Test: Ensures cards from bucket 0 and bucket 1 (since 2 is divisible by `2^1`) are included.
+ * 4. Day 4 Test: Ensures all cards are included when 4 is divisible by `2^2`.
+ * 5. Day 8 Test: Checks that all buckets contribute cards when 8 is divisible by `2^1`, `2^2`, and `2^3`.
+ * 6. Variable Bucket Sizes Test: Verifies correct handling of buckets with different numbers of cards.
  */
 describe("practice()", () => {
-  it("Example test case - replace with your own tests", () => {
-    assert.fail(
-      "Replace this test case with your own tests based on your testing strategy"
+  const card1 = new Flashcard("Front1", "Back1", "Hint1", ["tag1"]);
+  const card2 = new Flashcard("Front2", "Back2", "Hint2", ["tag2"]);
+  const card3 = new Flashcard("Front3", "Back3", "Hint3", ["tag3"]);
+
+  it("returns empty set for empty buckets", () => {
+    assert.deepStrictEqual(
+      practice([new Set(), new Set(), new Set()], 0),
+      new Set()
+    );
+  });
+
+  it("returns all cards on day 0", () => {
+    assert.deepStrictEqual(
+      practice([new Set([card1]), new Set([card2]), new Set([card3])], 0),
+      new Set([card1, card2, card3])
+    );
+  });
+
+  it("returns bucket 0 and bucket 1 cards on day 2", () => {
+    assert.deepStrictEqual(
+      practice([new Set([card1]), new Set([card2]), new Set([card3])], 2),
+      new Set([card1, card2])
+    );
+  });
+
+  it("returns all cards on day 4", () => {
+    assert.deepStrictEqual(
+      practice([new Set([card1]), new Set([card2]), new Set([card3])], 4),
+      new Set([card1, card2, card3])
+    );
+  });
+
+  it("returns bucket 0 and bucket 1 and bucket 2 cards on day 8", () => {
+    assert.deepStrictEqual(
+      practice([new Set([card1]), new Set([card2]), new Set([card3])], 8),
+      new Set([card1, card2, card3])
+    );
+  });
+
+  it("handles buckets with different lengths correctly", () => {
+    assert.deepStrictEqual(
+      practice([new Set([card1]), new Set(), new Set([card3])], 4),
+      new Set([card1, card3])
     );
   });
 });

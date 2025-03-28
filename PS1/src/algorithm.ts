@@ -90,8 +90,30 @@ export function practice(
   buckets: Array<Set<Flashcard>>,
   day: number
 ): Set<Flashcard> {
-  // TODO: Implement this function
-  throw new Error("Implement me!");
+  const result = new Set<Flashcard>();
+
+  // Always practice cards from bucket 0
+  if (buckets[0]) {
+    for (const card of buckets[0]) {
+      result.add(card);
+    }
+  }
+
+  // For other buckets, practice on days divisible by 2^(bucket number)
+  for (let bucketNum = 1; bucketNum < buckets.length; bucketNum++) {
+    const interval = Math.pow(2, bucketNum);
+
+    // Explicitly checking for undefined and assert the bucket exists
+    if (buckets[bucketNum] && day % interval === 0) {
+      // Here we assert the bucket is defined to avoid TypeScript error
+      const currentBucket = buckets[bucketNum] as Set<Flashcard>;
+      for (const card of currentBucket) {
+        result.add(card);
+      }
+    }
+  }
+
+  return result;
 }
 
 /**
