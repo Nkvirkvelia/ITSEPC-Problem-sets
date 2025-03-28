@@ -203,8 +203,71 @@ export function getHint(card: Flashcard): string {
  * @returns statistics about learning progress.
  * @spec.requires [SPEC TO BE DEFINED]
  */
-export function computeProgress(buckets: any, history: any): any {
-  // Replace 'any' with appropriate types
-  // TODO: Implement this function (and define the spec!)
-  throw new Error("Implement me!");
+interface PracticeRecord {
+  cardFront: string;
+  cardBack: string;
+  difficulty: AnswerDifficulty;
+}
+interface ProgressStats {
+  totalCards: number;
+  cardsInBuckets: Record<number, number>;
+  successRate: number;
+  averageMovesPerCard: number;
+  totalPracticeRecords: number;
+}
+
+export function computeProgress(
+  buckets: BucketMap,
+  history: PracticeRecord[]
+): ProgressStats {
+  let totalCards = 0;
+  const cardsInBuckets: Record<number, number> = {};
+
+  // Calculate total cards across all buckets
+  for (const [bucketld, flashcards] of Object.entries(buckets)) {
+    const bucketCardCount = flashcards.size;
+    totalCards += bucketCardCount;
+    cardsInBuckets[parseInt(bucketld)] = bucketCardCount;
+  }
+
+  // Ensure every bucket is accounted for
+  const maxBucketld = Math.max(...Object.keys(cardsInBuckets).map(Number), 0);
+  for (let i = 0; i <= maxBucketld; i++) {
+    if (!(i in cardsInBuckets)) {
+      cardsInBuckets[i] = 0;
+    }
+  }
+  // Calculate success rate
+  const totalAnswers = history.length;
+  const correctAnswers = history.filter(
+    (record) =>
+      record.difficulty === AnswerDifficulty.Hard ||
+      record.difficulty === AnswerDifficulty.Easy
+  ).length;
+
+  const successRate =
+    totalAnswers > 0 ? (correctAnswers / totalAnswers) * 100 : 0;
+
+  // Calculate average moves per card
+  const movesCountPerCard: Record<string, number> = {};
+  for (const record of history) {
+    const cardKey = "${record.cardFront}:${record.cardBack}";
+    movesCountPerCard[cardKey] = (movesCountPerCard[cardKey] || 0) + 1;
+  }
+
+  const averageMovesPerCard =
+    Object.keys(movesCountPerCard).length > 0
+      ? Object.values(movesCountPerCard).reduce(
+          (sum, moves) => sum + moves,
+          0
+        ) / Object.keys(movesCountPerCard).length
+      : 0;
+
+  return {
+    totalCards,
+    cardsInBuckets,
+    successRate,
+    averageMovesPerCard,
+    totalPracticeRecords: totalAnswers,
+  };
 }

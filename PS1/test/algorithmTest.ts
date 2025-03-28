@@ -360,10 +360,72 @@ describe("getHint()", () => {
  *
  * TODO: Describe your testing strategy for computeProgress() here.
  */
-describe("computeProgress()", () => {
-  it("Example test case - replace with your own tests", () => {
-    assert.fail(
-      "Replace this test case with your own tests based on your testing strategy"
-    );
-  });
-});
+// describe("computeProgress()", function() {
+//   it("should calculate total number of cards", function() {
+//     const buckets = {
+//     0: new Set([{ front: "card1", back: "answer1" }, { front: "card2", back: "answer2" }]),
+//     1: new Set([{ front: "card3", back: "answer3" }]),
+//     };
+//     const history = [];
+//     const result = computeProgress(buckets, history);
+
+//   assert.strictEqual(result.totalCards, 3, "Total cards should be 3");
+//   });
+
+//   it("should calculate the correct successrate", function() {
+//     const buckets = {
+//       0: new Set([{ front: "card1", back: "answer1" }, { front: "card2", back: "answer2" }]),
+//     };
+//     const history = [
+//       { cardFront: "card1", cardBack: "answer1", difficulty: AnswerDifficulty.Hard },
+//       { cardFront: "card2", cardBack: "answer2", difficulty: AnswerDifficulty.Easy },
+//     ];
+//     const result = computeProgress(buckets, history);
+
+//     assert.strictEqual(result.successRate, 100, "Success rate should be 100%");
+//   });
+
+//   it("should calculate average moves per card", function() {
+//     const buckets = {
+//       0: new Set([{ front: "card1", back: "answer1" }, { front: "card2", back: "answer2" }]),
+//     };
+//   const history = [
+//     { cardFront: "card1", cardBack: "answer1", difficulty:AnswerDifficulty.Hard },
+//     { cardFront: "card2", cardBack:"answer2", difficulty:AnswerDifficulty.Wrong },
+//     { cardFront: "card1", cardBack:"answer1", difficulty:AnswerDifficulty.Wrong },
+//   ];
+//   const result = computeProgress(buckets, history);
+
+//   assert.strictEqual(result.averageMovesPerCard, 1.5, "Average moves per card should be 1.5");
+//   });
+
+//   it("should initialize missing buckets to 0", function() {
+//     const buckets = {
+//     0: new Set([{ front: "card1", back: "answer1" }]),
+//     };
+//     const history = [];
+//     const result = computeProgress(buckets, history);
+
+//     assert.strictEqual(result.cardsInBuckets[0], 1, "Bucket 0 should have 1 card");
+//     assert.strictEqual(result.cardsInBuckets[1], 0, "Bucket 1 should have 0 cards");
+//   });
+
+//   it("should handle empty history correctly", function() {
+//     const buckets = {
+//       0: new Set([{ front: "card1", back:"answer1" }]),
+//     };
+//     const history: PracticeRecord[] = [];
+//     const result = computeProgress(buckets, history);
+//     assert.strictEqual(result.successRate, 0, "Success rate should be 0% when no answers exist");
+//     assert.strictEqual(result.averageMovesPerCard, 0, "Average moves per card should be 0 when no history");
+//   });
+
+//   it("should handle edge case with no buckets", function() {
+//     const buckets = {};
+//     const history = [];
+//     const result =computeProgress(buckets, history);
+
+//     assert.strictEqual(result.totalCards, 0, "Total cards should be 0 when there are no buckets");
+//     assert.strictEqual(result.cardsInBuckets[0], 0, "Bucket 0 should be initialized to 0");
+//   });
+// });
