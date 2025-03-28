@@ -79,12 +79,67 @@ describe("toBucketSets", () => {
 /*
  * Testing strategy for getBucketRange():
  *
- * TODO: Describe your testing strategy for getBucketRange() here.
+ * Empty buckets: Ensure function returns undefined when no flashcards exist.
+ * Single non-empty bucket: Check if function correctly identifies when only one bucket contains flashcards.
+ * Multiple non-empty buckets: Test cases where flashcards exist in different non-adjacent buckets.
+ * All buckets filled: Ensure function correctly returns the entire range when all buckets contain flashcards.
+ * Large gaps between filled buckets: Validate correct min and max range even when there are gaps between populated buckets.
  */
 describe("getBucketRange()", () => {
-  it("Example test case - replace with your own tests", () => {
-    assert.fail(
-      "Replace this test case with your own tests based on your testing strategy"
+  const card1 = new Flashcard("Front1", "Back1", "Hint1", ["tag1"]);
+  const card2 = new Flashcard("Front2", "Back2", "Hint2", ["tag2"]);
+  const card3 = new Flashcard("Front3", "Back3", "Hint3", ["tag3"]);
+
+  it("returns undefined for empty buckets", () => {
+    assert.deepStrictEqual(
+      getBucketRange([new Set(), new Set(), new Set()]),
+      undefined
+    );
+  });
+
+  it("returns correct range for single non-empty bucket", () => {
+    assert.deepStrictEqual(
+      getBucketRange([new Set(), new Set([card1]), new Set()]),
+      {
+        minBucket: 1,
+        maxBucket: 1,
+      }
+    );
+  });
+
+  it("returns correct range for multiple non-empty buckets", () => {
+    assert.deepStrictEqual(
+      getBucketRange([new Set([card1]), new Set(), new Set([card2])]),
+      {
+        minBucket: 0,
+        maxBucket: 2,
+      }
+    );
+  });
+
+  it("handles all buckets being filled", () => {
+    assert.deepStrictEqual(
+      getBucketRange([new Set([card1]), new Set([card2]), new Set([card3])]),
+      {
+        minBucket: 0,
+        maxBucket: 2,
+      }
+    );
+  });
+
+  it("handles a large gap between filled buckets", () => {
+    assert.deepStrictEqual(
+      getBucketRange([
+        new Set(),
+        new Set([card1]),
+        new Set(),
+        new Set(),
+        new Set([card2]),
+      ]),
+      {
+        minBucket: 1,
+        maxBucket: 4,
+      }
     );
   });
 });
