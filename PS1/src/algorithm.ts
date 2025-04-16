@@ -203,71 +203,69 @@ export function getHint(card: Flashcard): string {
  * @returns statistics about learning progress.
  * @spec.requires [SPEC TO BE DEFINED]
  */
-interface PracticeRecord {
-  cardFront: string;
-  cardBack: string;
+type PracticeRecord = {
+  card: Flashcard;
+  isCorrect: boolean;
   difficulty: AnswerDifficulty;
-}
-interface ProgressStats {
+  timestamp: number;
+};
+
+type ProgressStats = {
   totalCards: number;
   cardsInBuckets: Record<number, number>;
   successRate: number;
-  averageMovesPerCard: number;
-  totalPracticeRecords: number;
-}
+};
 
 export function computeProgress(
   buckets: BucketMap,
   history: PracticeRecord[]
 ): ProgressStats {
-  let totalCards = 0;
+  // Collect all flashcards from all buckets into a Set
+  const allCards = new Set<Flashcard>();
   const cardsInBuckets: Record<number, number> = {};
+  let totalCards = 0;
 
-  // Calculate total cards across all buckets
-  for (const [bucketld, flashcards] of Object.entries(buckets)) {
-    const bucketCardCount = flashcards.size;
-    totalCards += bucketCardCount;
-    cardsInBuckets[parseInt(bucketld)] = bucketCardCount;
-  }
-
-  // Ensure every bucket is accounted for
-  const maxBucketld = Math.max(...Object.keys(cardsInBuckets).map(Number), 0);
-  for (let i = 0; i <= maxBucketld; i++) {
-    if (!(i in cardsInBuckets)) {
-      cardsInBuckets[i] = 0;
+  for (const [bucketId, cardSet] of buckets.entries()) {
+    cardsInBuckets[bucketId] = cardSet.size;
+    totalCards += cardSet.size;
+    for (const card of cardSet) {
+      allCards.add(card);
     }
   }
-  // Calculate success rate
-  const totalAnswers = history.length;
-  const correctAnswers = history.filter(
-    (record) =>
-      record.difficulty === AnswerDifficulty.Hard ||
-      record.difficulty === AnswerDifficulty.Easy
-  ).length;
 
-  const successRate =
-    totalAnswers > 0 ? (correctAnswers / totalAnswers) * 100 : 0;
-
-  // Calculate average moves per card
-  const movesCountPerCard: Record<string, number> = {};
+  // Validate precondition
   for (const record of history) {
-    const cardKey = "${record.cardFront}:${record.cardBack}";
-    movesCountPerCard[cardKey] = (movesCountPerCard[cardKey] || 0) + 1;
+    if (!allCards.has(record.card)) {
+      throw new Error("PracticeRecord card not found in any bucket.");
+    }
   }
 
-  const averageMovesPerCard =
-    Object.keys(movesCountPerCard).length > 0
-      ? Object.values(movesCountPerCard).reduce(
-          (sum, moves) => sum + moves,
-          0
-        ) / Object.keys(movesCountPerCard).length
-      : 0;
+  let weightedCorrect = 0;
+  let weightedTotal = 0;
+
+  for (const { isCorrect, difficulty } of history) {
+    const weight =
+      difficulty === AnswerDifficulty.Easy
+        ? 1
+        : difficulty === AnswerDifficulty.Hard
+        ? 2
+        : 0; // Wrong
+    if (difficulty !== AnswerDifficulty.Wrong) {
+      weightedTotal += weight;
+      if (isCorrect) {
+        weightedCorrect += weight;
+      }
+    }
+  }
+
+  const successRate =
+    weightedTotal === 0
+      ? 0
+      : parseFloat((weightedCorrect / weightedTotal).toFixed(2));
 
   return {
     totalCards,
     cardsInBuckets,
     successRate,
-    averageMovesPerCard,
-    totalPracticeRecords: totalAnswers,
   };
 }

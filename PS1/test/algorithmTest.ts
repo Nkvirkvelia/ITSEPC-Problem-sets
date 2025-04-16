@@ -358,74 +358,102 @@ describe("getHint()", () => {
 /*
  * Testing strategy for computeProgress():
  *
- * TODO: Describe your testing strategy for computeProgress() here.
+ * I tested computeProgress() across a variety of representative scenarios:
+ *
+ * 1. Empty input:
+ *    - Both buckets and history are empty.
+ *    - Ensures function handles no data gracefully.
+ *
+ * 2. Buckets with cards but empty history:
+ *    - Verifies correct totalCards and bucket counts.
+ *    - Checks that successRate is 0 when there's no history.
+ *
+ * 3. Buckets with cards and non-empty history:
+ *    - Includes a mix of Easy, Hard, and incorrect answers.
+ *    - Validates successRate calculation with weighted difficulties.
+ *
+ * 4. Invalid history:
+ *    - Includes a card in history that’s not present in any bucket.
+ *    - Ensures the function throws an appropriate error.
+ *
+ * This approach ensures correctness across normal, edge, and failure cases.
  */
-// describe("computeProgress()", function() {
-//   it("should calculate total number of cards", function() {
-//     const buckets = {
-//     0: new Set([{ front: "card1", back: "answer1" }, { front: "card2", back: "answer2" }]),
-//     1: new Set([{ front: "card3", back: "answer3" }]),
-//     };
-//     const history = [];
-//     const result = computeProgress(buckets, history);
+describe("computeProgress()", () => {
+  const cardA = new Flashcard("A", "a", "hint A", []);
+  const cardB = new Flashcard("B", "b", "hint B", []);
+  const cardC = new Flashcard("C", "c", "hint C", []);
 
-//   assert.strictEqual(result.totalCards, 3, "Total cards should be 3");
-//   });
+  it("returns zero stats for empty inputs", () => {
+    const buckets: BucketMap = new Map();
+    expect(computeProgress(buckets, [])).toEqual({
+      totalCards: 0,
+      cardsInBuckets: {},
+      successRate: 0,
+    });
+  });
 
-//   it("should calculate the correct successrate", function() {
-//     const buckets = {
-//       0: new Set([{ front: "card1", back: "answer1" }, { front: "card2", back: "answer2" }]),
-//     };
-//     const history = [
-//       { cardFront: "card1", cardBack: "answer1", difficulty: AnswerDifficulty.Hard },
-//       { cardFront: "card2", cardBack: "answer2", difficulty: AnswerDifficulty.Easy },
-//     ];
-//     const result = computeProgress(buckets, history);
+  it("calculates totalCards and zero successRate with no history", () => {
+    const buckets: BucketMap = new Map([
+      [0, new Set([cardA, cardB])],
+      [1, new Set([cardC])],
+    ]);
 
-//     assert.strictEqual(result.successRate, 100, "Success rate should be 100%");
-//   });
+    expect(computeProgress(buckets, [])).toEqual({
+      totalCards: 3,
+      cardsInBuckets: { 0: 2, 1: 1 },
+      successRate: 0,
+    });
+  });
 
-//   it("should calculate average moves per card", function() {
-//     const buckets = {
-//       0: new Set([{ front: "card1", back: "answer1" }, { front: "card2", back: "answer2" }]),
-//     };
-//   const history = [
-//     { cardFront: "card1", cardBack: "answer1", difficulty:AnswerDifficulty.Hard },
-//     { cardFront: "card2", cardBack:"answer2", difficulty:AnswerDifficulty.Wrong },
-//     { cardFront: "card1", cardBack:"answer1", difficulty:AnswerDifficulty.Wrong },
-//   ];
-//   const result = computeProgress(buckets, history);
+  it("computes correct stats with mixed history", () => {
+    const buckets: BucketMap = new Map([
+      [0, new Set([cardA, cardB])],
+      [1, new Set([cardC])],
+    ]);
 
-//   assert.strictEqual(result.averageMovesPerCard, 1.5, "Average moves per card should be 1.5");
-//   });
+    const history = [
+      {
+        card: cardA,
+        isCorrect: true,
+        difficulty: AnswerDifficulty.Easy,
+        timestamp: 1,
+      },
+      {
+        card: cardB,
+        isCorrect: false,
+        difficulty: AnswerDifficulty.Hard,
+        timestamp: 2,
+      },
+      {
+        card: cardC,
+        isCorrect: true,
+        difficulty: AnswerDifficulty.Hard,
+        timestamp: 3,
+      },
+    ];
 
-//   it("should initialize missing buckets to 0", function() {
-//     const buckets = {
-//     0: new Set([{ front: "card1", back: "answer1" }]),
-//     };
-//     const history = [];
-//     const result = computeProgress(buckets, history);
+    // weightedCorrect = 1 (easy) + 2 (hard) = 3
+    // weightedTotal = 1 (easy) + 2 (hard) = 3
+    expect(computeProgress(buckets, history)).toEqual({
+      totalCards: 3,
+      cardsInBuckets: { 0: 2, 1: 1 },
+      successRate: 1.0,
+    });
+  });
 
-//     assert.strictEqual(result.cardsInBuckets[0], 1, "Bucket 0 should have 1 card");
-//     assert.strictEqual(result.cardsInBuckets[1], 0, "Bucket 1 should have 0 cards");
-//   });
+  it("throws error if card in history is not in any bucket", () => {
+    const buckets: BucketMap = new Map([[0, new Set([cardA])]]);
+    const history = [
+      {
+        card: cardB, // Not in bucket
+        isCorrect: true,
+        difficulty: AnswerDifficulty.Easy,
+        timestamp: 1,
+      },
+    ];
 
-//   it("should handle empty history correctly", function() {
-//     const buckets = {
-//       0: new Set([{ front: "card1", back:"answer1" }]),
-//     };
-//     const history: PracticeRecord[] = [];
-//     const result = computeProgress(buckets, history);
-//     assert.strictEqual(result.successRate, 0, "Success rate should be 0% when no answers exist");
-//     assert.strictEqual(result.averageMovesPerCard, 0, "Average moves per card should be 0 when no history");
-//   });
-
-//   it("should handle edge case with no buckets", function() {
-//     const buckets = {};
-//     const history = [];
-//     const result =computeProgress(buckets, history);
-
-//     assert.strictEqual(result.totalCards, 0, "Total cards should be 0 when there are no buckets");
-//     assert.strictEqual(result.cardsInBuckets[0], 0, "Bucket 0 should be initialized to 0");
-//   });
-// });
+    expect(() => computeProgress(buckets, history)).toThrow(
+      "PracticeRecord card not found in any bucket."
+    );
+  });
+});
